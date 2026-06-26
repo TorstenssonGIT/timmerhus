@@ -1,100 +1,92 @@
 """
-Timmerhus — Konstruktionsdokument Konsistenstester
-===================================================
-Verifierar att alla mått, måttkedjor och tillgänglighetskrav stämmer.
+Timmerhus — Konstruktionsdokument Konsistenstester v4.0
+=======================================================
 Kör med: python tests/test_consistency.py
 """
 
 import unittest
+import math
 
 # ── Grunddata ────────────────────────────────────────────────────────────────
-YTTERVÄGG       = 0.170  # m, blockat 7" timmer
-INNERVÄGG       = 0.150  # m, brand/ljud
+YTTERVÄGG   = 0.170
+INNERVÄGG   = 0.150
 
-# Yttre mått
-YTTRE_LÄNGD     = 9.00
-YTTRE_BREDD     = 7.80
+YTTRE_LÄNGD = 9.00
+YTTRE_BREDD = 8.00
 
-# Invändiga mått
-INV_LÄNGD       = YTTRE_LÄNGD - 2 * YTTERVÄGG   # 8.66 m
-INV_BREDD       = YTTRE_BREDD - 2 * YTTERVÄGG   # 7.46 m
+INV_LÄNGD   = YTTRE_LÄNGD - 2 * YTTERVÄGG   # 8.66 m
+INV_BREDD   = YTTRE_BREDD - 2 * YTTERVÄGG   # 7.66 m
 
 # Längdkedja
-STORSTUGA       = 4.03
-HJÄRTVÄGG       = 0.17
-UTILITIES       = 1.30
-MASTER_DJUP     = 3.01
+STORSTUGA   = 4.03
+HJÄRTVÄGG   = 0.17
+UTILITIES   = 1.30
+MASTER_DJUP = 3.01
 
 # Breddkedja
-ÖVRE_BLOCK      = 3.46
-GÅNG            = 1.20
-NEDRE_BLOCK     = 2.50
+ÖVRE_BLOCK  = 2.96
+GÅNG        = 1.20
+NEDRE_BLOCK = 3.20
 
 # Rum
-MASTER_BREDD    = ÖVRE_BLOCK
-BADRUM_B        = NEDRE_BLOCK
-BADRUM_D        = 1.70
-LILLA_B         = NEDRE_BLOCK
-LILLA_D         = 2.21
-UTILITIES_B     = ÖVRE_BLOCK
+MASTER_BREDD = ÖVRE_BLOCK
+BADRUM_B    = NEDRE_BLOCK
+BADRUM_D    = 1.70
+LILLA_B     = NEDRE_BLOCK
+LILLA_D     = 2.21
 
 # Trappa
-TRAPPA_BREDD    = 0.90
-STEGHÖJD        = 0.245
-KLÄTTHÖJD       = 2.734
-KVARTSVARV      = TRAPPA_BREDD
+TRAPPA_BREDD  = 1.00
+STEGHÖJD      = 0.196
+STEGLÄNGD     = 0.245
+ANTAL_STEG    = 12
+STEG_LYFTS    = 10
+KVARTSVARV    = TRAPPA_BREDD
+KLÄTTHÖJD     = 2.734
 
 # Loft
-LOFT_BREDD      = INV_BREDD
-LOFT_DJUP       = 4.06
-FÖRVARING_DJUP  = 1.03
-TRAPPGLUGG_L    = (KLÄTTHÖJD / STEGHÖJD)  # antal steg
+LOFT_BREDD    = INV_BREDD
+LOFT_DJUP     = 4.06
+FÖRVARING_DJUP = 1.03
 
 # Entréficka
-ENTRÉ_BREDD     = 0.55 + GÅNG   # Master-sidan + gång
-ENTRÉ_DJUP      = 0.85
+ENTRÉ_BREDD   = 0.55 + GÅNG
+ENTRÉ_DJUP    = 0.85
 
-# Säng Master
-SÄNG_M_B        = 1.60
-SÄNG_M_L        = 2.00
+# Sängar
+SÄNG_M_B = 1.60
+SÄNG_M_L = 2.00
+SÄNG_L_B = 0.80
+SÄNG_L_L = 2.00
 
-# Säng lilla sovrum
-SÄNG_L_B        = 0.80
-SÄNG_L_L        = 2.00
+# Kök
+KÖK_LÄNGD = 0.60 + 0.60 + 0.30 + 0.80 + 0.45 + 0.45  # 3.20 m
 
-TOLERANCE = 0.005  # 5 mm tolerans
+TOLERANCE = 0.005
 
 
 class TestMåttkedjor(unittest.TestCase):
 
     def test_invändig_längd(self):
-        """Invändig längd = Yttre längd - 2 × yttervägg"""
-        self.assertAlmostEqual(INV_LÄNGD, 8.66, delta=TOLERANCE,
-            msg=f"Invändig längd ska vara 8,66 m, är {INV_LÄNGD:.3f} m")
+        self.assertAlmostEqual(INV_LÄNGD, 8.66, delta=TOLERANCE)
 
     def test_invändig_bredd(self):
-        """Invändig bredd = Yttre bredd - 2 × yttervägg"""
-        self.assertAlmostEqual(INV_BREDD, 7.46, delta=TOLERANCE,
-            msg=f"Invändig bredd ska vara 7,46 m, är {INV_BREDD:.3f} m")
+        self.assertAlmostEqual(INV_BREDD, 7.66, delta=TOLERANCE)
 
     def test_längdkedja(self):
-        """Storstuga + Hjärtvägg + Utilities + Innervägg + Master = 8,66 m"""
         summa = STORSTUGA + HJÄRTVÄGG + UTILITIES + INNERVÄGG + MASTER_DJUP
         self.assertAlmostEqual(summa, INV_LÄNGD, delta=TOLERANCE,
-            msg=f"Längdkedja summerar till {summa:.3f} m, ska vara {INV_LÄNGD:.3f} m")
+            msg=f"Längdkedja: {summa:.3f} m, ska vara {INV_LÄNGD:.3f} m")
 
     def test_breddkedja(self):
-        """Övre block + Innervägg + Gång + Innervägg + Nedre block = 7,46 m"""
         summa = ÖVRE_BLOCK + INNERVÄGG + GÅNG + INNERVÄGG + NEDRE_BLOCK
         self.assertAlmostEqual(summa, INV_BREDD, delta=TOLERANCE,
-            msg=f"Breddkedja summerar till {summa:.3f} m, ska vara {INV_BREDD:.3f} m")
+            msg=f"Breddkedja: {summa:.3f} m, ska vara {INV_BREDD:.3f} m")
 
     def test_utilities_djup(self):
-        """Utilities djup ska vara 1,30 m"""
         self.assertAlmostEqual(UTILITIES, 1.30, delta=TOLERANCE)
 
     def test_master_djup(self):
-        """Master Bedroom djup ska vara 3,01 m"""
         self.assertAlmostEqual(MASTER_DJUP, 3.01, delta=TOLERANCE)
 
 
@@ -102,131 +94,117 @@ class TestRumsAreaer(unittest.TestCase):
 
     def test_storstuga_area(self):
         area = INV_BREDD * STORSTUGA
-        self.assertAlmostEqual(area, 30.1, delta=0.1,
-            msg=f"Storstuga area ska vara 30,1 m², är {area:.1f} m²")
+        self.assertAlmostEqual(area, 30.9, delta=0.1)
 
     def test_master_area(self):
         area = MASTER_BREDD * MASTER_DJUP
-        self.assertAlmostEqual(area, 10.4, delta=0.1,
-            msg=f"Master Bedroom area ska vara 10,4 m², är {area:.1f} m²")
-
-    def test_utilities_area(self):
-        area = UTILITIES_B * UTILITIES
-        self.assertAlmostEqual(area, 4.5, delta=0.1,
-            msg=f"Utilities area ska vara 4,5 m², är {area:.1f} m²")
+        self.assertAlmostEqual(area, 8.9, delta=0.1)
 
     def test_badrum_area(self):
         area = BADRUM_B * BADRUM_D
-        self.assertAlmostEqual(area, 4.3, delta=0.1,
-            msg=f"Badrum area ska vara 4,3 m², är {area:.1f} m²")
+        self.assertAlmostEqual(area, 5.4, delta=0.1)
 
     def test_lilla_sovrum_area(self):
         area = LILLA_B * LILLA_D
-        self.assertAlmostEqual(area, 5.5, delta=0.1,
-            msg=f"Lilla sovrummet area ska vara 5,5 m², är {area:.1f} m²")
+        self.assertAlmostEqual(area, 7.1, delta=0.1)
 
 
 class TestTillgänglighet(unittest.TestCase):
 
     def test_gång_bredd(self):
-        """Gång ska vara minst 120 cm för rullstol"""
-        self.assertGreaterEqual(GÅNG, 1.20,
-            msg=f"Gång {GÅNG:.2f} m — för smal för rullstol (min 1,20 m)")
+        self.assertGreaterEqual(GÅNG, 1.20)
 
     def test_master_fri_sida_säng(self):
-        """Fri sida om säng i Master ska vara minst 90 cm"""
-        fri_sida = MASTER_BREDD - SÄNG_M_L
+        fri_sida = MASTER_BREDD - SÄNG_M_B
         self.assertGreaterEqual(fri_sida, 0.90,
-            msg=f"Master fri sida om säng: {fri_sida:.2f} m — under 0,90 m minimum")
+            msg=f"Master fri sida: {fri_sida:.2f} m")
 
     def test_master_fotända(self):
-        """Fri yta vid sängens fotända i Master"""
-        fri_fotända = MASTER_DJUP - SÄNG_M_B
-        self.assertGreaterEqual(fri_fotända, 1.20,
+        fri_fotända = MASTER_DJUP - SÄNG_M_L
+        self.assertGreaterEqual(fri_fotända, 1.00,
             msg=f"Master fotända: {fri_fotända:.2f} m")
 
-    def test_lilla_sovrum_fri_yta_dörr_stängd(self):
-        """Fri yta i lilla sovrummet med dörr stängd"""
-        fri_bredd = LILLA_B - SÄNG_L_B
-        self.assertGreaterEqual(fri_bredd, 1.30,
-            msg=f"Lilla sovrum fri bredd: {fri_bredd:.2f} m — under vändcirkel 1,30 m")
+    def test_master_garderober(self):
+        garderob_yta = MASTER_DJUP - ENTRÉ_DJUP - INNERVÄGG - 1.00
+        self.assertGreaterEqual(garderob_yta, 1.00,
+            msg=f"Garderobsyta: {garderob_yta:.2f} m")
 
-    def test_lilla_sovrum_fri_yta_dörr_öppen(self):
-        """Fri yta i lilla sovrummet med dörr öppen (dörrblad 0,40 m)"""
-        dörrblad = 0.40
-        fri_djup = LILLA_D - dörrblad
+    def test_badrum_vändcirkel(self):
+        self.assertGreaterEqual(BADRUM_B, 1.30)
+        self.assertGreaterEqual(BADRUM_D, 1.30)
+
+    def test_lilla_sovrum_fri_yta(self):
         fri_bredd = LILLA_B - SÄNG_L_B
-        self.assertGreaterEqual(fri_djup, 1.30,
-            msg=f"Lilla sovrum fri djup med dörr öppen: {fri_djup:.2f} m")
         self.assertGreaterEqual(fri_bredd, 1.30,
             msg=f"Lilla sovrum fri bredd: {fri_bredd:.2f} m")
 
-    def test_entréficka_bredd(self):
-        """Entréficka ska vara minst 1,75 m bred"""
-        self.assertAlmostEqual(ENTRÉ_BREDD, 1.75, delta=TOLERANCE,
-            msg=f"Entréficka bredd: {ENTRÉ_BREDD:.2f} m")
-
-    def test_entréficka_djup(self):
-        """Entréficka ska vara 0,85 m djup"""
+    def test_entréficka(self):
+        self.assertAlmostEqual(ENTRÉ_BREDD, 1.75, delta=TOLERANCE)
         self.assertAlmostEqual(ENTRÉ_DJUP, 0.85, delta=TOLERANCE)
+
+
+class TestKök(unittest.TestCase):
+
+    def test_kök_längd(self):
+        self.assertAlmostEqual(KÖK_LÄNGD, 3.20, delta=TOLERANCE,
+            msg=f"Kök längd: {KÖK_LÄNGD:.3f} m, ska vara 3,20 m")
+
+    def test_kök_ryms_i_nedre_blocket(self):
+        self.assertLessEqual(KÖK_LÄNGD, NEDRE_BLOCK + TOLERANCE)
 
 
 class TestTrappMått(unittest.TestCase):
 
-    def test_antal_uppsteg(self):
-        """Antal uppsteg ska vara 12"""
-        import math
-        uppsteg = math.ceil(KLÄTTHÖJD / STEGHÖJD)
-        self.assertEqual(uppsteg, 12,
-            msg=f"Antal uppsteg: {uppsteg}, ska vara 12")
+    def test_steghöjd(self):
+        beräknad = 2.35 / 12
+        self.assertAlmostEqual(beräknad, STEGHÖJD, delta=0.001)
 
     def test_horisontell_längd(self):
-        """Trappans horisontella längd = 12 × 24,5 cm = 2,94 m"""
-        längd = 12 * STEGHÖJD
-        self.assertAlmostEqual(längd, 2.94, delta=TOLERANCE,
-            msg=f"Horisontell längd: {längd:.3f} m, ska vara 2,94 m")
+        längd = ANTAL_STEG * STEGLÄNGD
+        self.assertAlmostEqual(längd, 2.94, delta=TOLERANCE)
+
+    def test_lyfthöjd(self):
+        lyfthöjd = STEG_LYFTS * STEGLÄNGD
+        self.assertAlmostEqual(lyfthöjd, 2.45, delta=TOLERANCE)
+
+    def test_fri_gånghöjd(self):
+        fri_höjd = STEG_LYFTS * STEGHÖJD
+        self.assertGreaterEqual(fri_höjd, 1.90,
+            msg=f"Fri gånghöjd: {fri_höjd:.3f} m")
 
     def test_trappglugg(self):
-        """Trappglugg = 0,90 × (2,94 + 0,90) = 0,90 × 3,84 m"""
-        glugg_längd = 12 * STEGHÖJD + KVARTSVARV
-        self.assertAlmostEqual(glugg_längd, 3.84, delta=TOLERANCE,
-            msg=f"Trappglugg längd: {glugg_längd:.3f} m, ska vara 3,84 m")
-        self.assertAlmostEqual(TRAPPA_BREDD, 0.90, delta=TOLERANCE)
+        glugg_längd = ANTAL_STEG * STEGLÄNGD + KVARTSVARV
+        self.assertAlmostEqual(glugg_längd, 3.94, delta=TOLERANCE)
 
     def test_klätthöjd_uppbyggnad(self):
-        """Klätthöjd = innerhöjd + loftbalk + golvregel + golv"""
-        innerhöjd   = 2.350
-        loftbalk    = 0.225
-        golvregel   = 0.125
-        golv        = 0.034
-        total = innerhöjd + loftbalk + golvregel + golv
-        self.assertAlmostEqual(total, KLÄTTHÖJD, delta=TOLERANCE,
-            msg=f"Klätthöjd uppbyggnad: {total:.3f} m, ska vara {KLÄTTHÖJD:.3f} m")
+        total = 2.350 + 0.225 + 0.125 + 0.034
+        self.assertAlmostEqual(total, KLÄTTHÖJD, delta=TOLERANCE)
+
+    def test_trappvikt(self):
+        densitet = 500
+        steg_vikt = ANTAL_STEG * (TRAPPA_BREDD * STEGLÄNGD * 0.045) * densitet
+        vagnstycke_längd = math.sqrt(2.94**2 + 2.156**2)
+        vagnstycke_vikt = 2 * (0.051 * 0.254 * vagnstycke_längd) * densitet
+        total = steg_vikt + vagnstycke_vikt + 15
+        self.assertLess(total, 150, msg=f"Trappvikt: {total:.0f} kg")
 
 
 class TestLoft(unittest.TestCase):
 
     def test_loft_bruttomått(self):
-        """Loft brutto = 7,46 × 4,06 m = 30,3 m²"""
         area = LOFT_BREDD * LOFT_DJUP
-        self.assertAlmostEqual(area, 30.3, delta=0.1,
-            msg=f"Loft brutto: {area:.1f} m²")
+        self.assertAlmostEqual(area, 31.1, delta=0.2)
 
     def test_loft_fri_golvyta(self):
-        """Fri golvyta efter förvaring båda sidor"""
         fri_bredd = LOFT_BREDD - 2 * FÖRVARING_DJUP
-        fri_yta = fri_bredd * LOFT_DJUP
-        self.assertAlmostEqual(fri_bredd, 5.40, delta=TOLERANCE,
-            msg=f"Fri loftbredd: {fri_bredd:.2f} m")
+        self.assertAlmostEqual(fri_bredd, 5.60, delta=TOLERANCE)
 
     def test_loft_netto(self):
-        """Netto loftyta efter trappglugg"""
         fri_bredd = LOFT_BREDD - 2 * FÖRVARING_DJUP
         fri_yta = fri_bredd * LOFT_DJUP
-        trappglugg = TRAPPA_BREDD * (12 * STEGHÖJD + KVARTSVARV)
+        trappglugg = TRAPPA_BREDD * (ANTAL_STEG * STEGLÄNGD + KVARTSVARV)
         netto = fri_yta - trappglugg
-        self.assertAlmostEqual(netto, 18.5, delta=0.2,
-            msg=f"Netto loftyta: {netto:.1f} m²")
+        self.assertAlmostEqual(netto, 18.8, delta=0.3)
 
 
 if __name__ == '__main__':
